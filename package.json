@@ -1,0 +1,21 @@
+{
+  "name": "log-my-food-app",
+  "version": "1.0.0",
+  "description": "A CLI application that allow users to log what they've eaten and in turn understand what they're consuming.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "A",
+    "CLI",
+    "application",
+    "that",
+    "puts",
+    "your",
+    "health",
+    "first"
+  ],
+  "author": "Sanya Oluwadare",
+  "license": "ISC"
+}

@@ -1,0 +1,34 @@
+{
+  "food": [
+    {
+      "id": 1,
+      "name": "apple",
+      "calorie": 88,
+      "serving_size": 6,
+      "serving_size_units": "oz"
+    },
+    {
+      "id": 2,
+      "name": "chicken breast",
+      "calorie": 125,
+      "serving_size": 3,
+      "serving_size_units": "oz"
+    },
+    {
+      "id": 3,
+      "name": "whole milk",
+      "calorie": 240,
+      "serving_size": 8,
+      "serving_size_units": "oz"
+    }
+  ],
+
+  "users": [
+    {
+      "id": 1,
+      "firstname": "Sam",
+      "lastname": "Davies",
+      "email": "sam@acme.com"
+    }
+  ]  
+}
