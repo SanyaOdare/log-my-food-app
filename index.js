@@ -10,34 +10,22 @@ readline.on('line', async line => {
   switch (line.trim()) {
     case 'list vegan foods':
       {
-        axios.get(`http://localhost:3001/food`).then(({data}) => {
+        const { data } = await axios.get(`http://localhost:3001/food`);
+        function* listVeganFoods() {
           let idx = 0;
-          const veganOnly = data.filter(food => {
-            return food.dietary_preferences.includes('vegan');
-          })
-          const veganIterable = {
-            [Symbol.iterator]() {  
-              return {
-                [Symbol.iterator]() {
-                  return this;
-                },
-                next() {
-                  const current = veganOnly[idx];
-                  idx++;
-                  if (current) {
-                    return { value: current, done: false};
-                  } else {
-                    return { value: current, done: true};
-                  }
-                },
-              };
-            },
-          };
-          for (let val of veganIterable) {
+          const veganOnly = data.filter(food => 
+            food.dietary_preferences.includes('vegan'),
+          );
+          while(veganOnly[idx]) {
+            yield veganOnly[idx];
+            idx++;
+          }
+
+        }
+          for (let val of listVeganFoods()) {
             console.log(val.name);
           }
           readline.prompt();
-        });        
       }
       break;
     case 'log':        
