@@ -47,7 +47,7 @@ readline.on('line', async line => {
 
           const actionIterator = {
             [Symbol.iterator]() {
-              const positions = [...this.actions];
+              let positions = [...this.actions];
               return {
                 [Symbol.iterator]() {
                   return this;
@@ -61,6 +61,14 @@ readline.on('line', async line => {
                     return { done: true };
                   }
                 },
+                return () {
+                  positions = [];
+                  return { done: true };
+                },
+                throw(error) {
+                  console.log(error);
+                  return { value: undefined, done: true};
+                }
               };
             },
             actions: [askForServingSize, displayCalories],
@@ -70,7 +78,11 @@ readline.on('line', async line => {
             readline.question(
               `How many servings did you eat? (as a decimal: 1, 0.5, 1.25, etc.. )`,
               servingSize => {
-                actionIt.next(servingSize, food)
+                if (servingSize === 'nevermind' || servingSize === 'n') {
+                  actionIt.return()
+                } else {
+                  actionIt.next(servingSize, food)                  
+                }                
               },
             );
           }
