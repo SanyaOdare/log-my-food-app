@@ -20,7 +20,6 @@ readline.on('line', async line => {
             yield veganOnly[idx];
             idx++;
           }
-
         }
           for (let val of listVeganFoods()) {
             console.log(val.name);
@@ -33,43 +32,20 @@ readline.on('line', async line => {
           const it = data[Symbol.iterator]();
           let actionIt;
 
-          const actionIterator = {
-            [Symbol.iterator]() {
-              let positions = [...this.actions];
-              return {
-                [Symbol.iterator]() {
-                  return this;
-                },
-                next(...args) {
-                  if (positions.length > 0) {
-                    const position = positions.shift();
-                    const result = positions(...args);
-                    return { value: result, done: false };
-                  } else {
-                    return { done: true };
-                  }
-                },
-                return () {
-                  positions = [];
-                  return { done: true };
-                },
-                throw(error) {
-                  console.log(error);
-                  return { value: undefined, done: true };
-                },
-              };
-            },
-            actions: [askForServingSize, displayCalories],
-          };
+          function actionGenerator() {
+            const food = yield;
+            const servingSize = yield askForServingSize();
+            yield displayCalories(servingSize, food);
+          }
 
-          function askForServingSize(food) {
+          function askForServingSize() {
             readline.question(
               `How many servings did you eat? (as a decimal: 1, 0.5, 1.25, etc.. )`,
               servingSize => {
                 if (servingSize === 'nevermind' || servingSize === 'n') {
-                  actionIt.return()
+                  actionIt.return();
                 } else {
-                  actionIt.next(servingSize, food)                  
+                  actionIt.next(servingSize, food);
                 }                
               },
             );
@@ -115,8 +91,11 @@ readline.on('line', async line => {
             while(!position.done) {
               const food = position.value.name;
               if (food === item) {
-                console.log(`${item} has ${position.value.calories} calories.`);
-                actionIt = actionIterator[Symbol.iterator]();
+                console.log(
+                  `A single serving of ${item} has ${position.value.calories} calories.`
+                );
+                actionIt = actionGenerator();
+                actionIt.next();
                 actionIt.next(position.value);
               }
               position = it.next();
@@ -124,6 +103,47 @@ readline.on('line', async line => {
             readline.prompt();
           });
           break;
+        case `today's log`:
+          readline.question('Email: ', emailAddress => {
+            const { data } = await axios.get(
+              `http://localhost:3001/users?email=${emailAddress}`
+            );
+            const foodLog = data[0].log || [];
+            let totalCalories = 0;
+            
+            function* getFoodLog() {
+              yield* foodLog;
+            }
+
+            for (const entry of getFoodLog()) {
+              const timestamp = Object.keys(entry)[0];
+              if(isToday(new Date(Number(timestamp)))) {
+                console.log(
+                  `${entry[timestamp].food}, ${entry[timestamp].servingSize} serving(s)`,
+                );
+                totalCalories += entry[timestamp].calories;
+              }
+            }
+            console.log('---------------');
+            console.log(`Total Calories: ${totalCalories}`);
+            readline.prompt();
+
+
+
+
+
+
+          });
+          break;
       }
       readline.prompt();
 });
+
+function isToday(timestamp) {
+  const today = new Date();
+  return (
+    timestamp.getDate() === today.getDate() &&
+    timestamp.getMonth() === today.getMonth() &&
+    timestamp.getFullYear() === today.getFullYear()
+  );
+}
